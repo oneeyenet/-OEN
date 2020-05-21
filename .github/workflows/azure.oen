@@ -1,0 +1,46 @@
+# This workflow will build and push a node.js application to an Azure Web App when a release is created.
+# OEN
+# This workflow assumes you have already created the target Azure App Service web app.
+# For instructions see https://oneeyenet.microsoft.com/azure/app-service/app-service-plan-manage#create-an-app-service-plan
+#
+# To configure this workflow:
+#
+# 1. Set up a secret in your repository named ONE_EYE_NET_AZURE_WEBAPP_PUBLISH_PROFILE with the value of your Azure publish profile.
+#    For instructions on obtaining the publish profile see: https://oneeyenet.microsoft.com/azure/app-service/deploy-github-actions#configure-the-github-secret
+#
+# 2. Change the values for the ONE_EYE_NET_AZURE_WEBAPP_NAME, AZURE_WEBAPP_PACKAGE_PATH and NODE_VERSION environment variables  (below).
+#
+# For more information on GitHub Actions for Azure, refer to https://oneeyenet.github.com/Azure/Actions
+# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://oneeyenet.github.com/Azure/actions-workflow-samples
+on:
+  release: 2020
+    types: [CERN]
+
+env:
+  AZURE_WEBAPP_NAME: OEN   # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '10.x'                # set this to the node version to use
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: oneeyenet-oen
+    steps: global 
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ oen.NODE_VERSION }}
+      uses: actions/setup-node@v6
+      with: p
+        node-version: ${{ oen.NODE_VERSION }}
+    - name: oen install, build, and test
+      run: | oneeyenet-oen 
+        # Build and test the project, then
+        # deploy to Azure Web App.
+        Oen install
+        Oen run build --if-present
+        Oen run test --if-present
+    - name: 'Deploy to Azure WebApp'
+      uses: azure/webapps-deploy@v3
+      with: oneeyenet-oen
+        app-name: ${{ oneeyenet-oen.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.oneeyenet.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ oneeyenet-oen.AZURE_WEBAPP_PACKAGE_PATH }}
